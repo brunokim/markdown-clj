@@ -1,3 +1,13 @@
+Title:   Markdown parser written in Clojure  
+Authors: yoghtos  
+         brunokim  
+Blank:  
+  Comment: This is a comment intended to demonstrate  
+    that you need a line indented by least than 4 lines  
+    is a regular line, while others are continuations of the  
+    previous.  
+Language: en-US
+
 #Markdown parser written in Clojure
 
 A markdown parser that compiles to both Clojure and ClojureScript.
