@@ -24,6 +24,9 @@
       (parse-reference-link line references))
     @references))
 
+(defn parse-metadata [lines]
+  #_do-nothing)
+
 (defn md->html
   "processes input text line by line and outputs an HTML string"
   [text & params]
@@ -33,6 +36,7 @@
           lines       (.split text "\n")
           html        (goog.string.StringBuffer. "")
           references  (when (:reference-links? params) (parse-references lines))
+          metadata    (when (:parse-meta? params) (parse-metadata lines))
           transformer (init-transformer params)]
       (loop [[line & more] lines
              state (merge {:clojurescript true
@@ -51,7 +55,10 @@
                    (assoc (transformer html line (first more) state)
                           :last-line-empty? (empty? line)))
             (transformer html line "" (assoc state :eof true)))))
-      (.toString html))))
+      (let [html (.toString html)]
+        (if (:parse-meta? params)
+          {:html html :metadata metadata}
+          html)))))
 
 (defn ^:export mdToHtml
   "Js accessible wrapper"

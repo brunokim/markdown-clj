@@ -233,3 +233,18 @@
   (is (= "<p>The fish was 192.8 lbs and was amazing to see.</p>"
          (markdown/md-to-html-string "The fish was\n192.8 lbs and was amazing to see."))))
 
+(deftest metadata
+  (let [text (str "Title: This is a title  \n"
+                  "Author: Bruno Kim  \n"
+                  "Comment: New  \n"
+                  "    lines  \n"
+                  "Blank: \n"
+                  "wrong key - this is ignored\n"
+                  "\n"
+                  "First paragraph\n")
+        {:keys [html metadata]} (markdown/md-to-html-string text :parse-meta? true)]
+    (is (= {:title ["This is a title"] :author ["Bruno Kim"] :comment ["New", "lines"]}
+           metadata))
+    (is (= "<p>First paragraph</p>"
+           html))))
+

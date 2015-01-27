@@ -32,13 +32,17 @@
           (parse-reference-link line references))))
     @references))
 
+(defn parse-metadata [in]
+  #_do-nothing)
+
 (defn md-to-html
   "reads markdown content from the input stream and writes HTML to the provided output stream"
   [in out & params]
   (binding [markdown.transformers/*substring* (fn [^String s n] (.substring s n))
             markdown.transformers/formatter clojure.core/format]
     (let [params (when params (apply (partial assoc {}) params))
-          references (when (:reference-links? params) (parse-references in))]
+          references (when (:reference-links? params) (parse-references in))
+          metadata (when (:parse-meta? params) (parse-metadata in))]
       (with-open [^java.io.BufferedReader rdr (io/reader in)
                   ^java.io.BufferedWriter wrt (io/writer out)]
         (let [transformer (init-transformer wrt params)]
@@ -56,14 +60,18 @@
                        (assoc (transformer line next-line state)
                               :last-line-empty? (empty? (.trim line))))
                 (transformer "" nil (assoc state :eof true))))))
-        (.flush wrt)))))
+        (.flush wrt)
+        metadata))))
 
 (defn md-to-html-string
   "converts a markdown formatted string to an HTML formatted string"
   [text & params]
   (when text
     (let [input (new StringReader text)
-          output (new StringWriter)]
-      (apply (partial md-to-html input output) params)
-      (.toString output))))
+          output (new StringWriter)
+          metadata (apply (partial md-to-html input output) params)
+          html (.toString output)]
+      (if (when params (:parse-meta? (apply (partial assoc {}) params)))
+        {:html html :metadata metadata}
+        html))))
 
